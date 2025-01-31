@@ -1,4 +1,5 @@
 # utils.py
+
 import requests
 from constants import (
     API_BASE_URL,
@@ -6,6 +7,7 @@ from constants import (
     REFRESH_TOKEN_FILE,
     HOST_FILE
 )
+
 
 ############################################
 # Lectura / Escritura de archivos
@@ -21,6 +23,7 @@ def read_file(file_path: str) -> str | None:
     except FileNotFoundError:
         return None
 
+
 def write_file(file_path: str, content: str):
     """
     Escribe 'content' en el archivo file_path.
@@ -31,6 +34,12 @@ def write_file(file_path: str, content: str):
             f.write(content)
     except IOError as e:
         raise IOError(f"Error al escribir en el archivo: {file_path}. Detalle: {str(e)}")
+
+
+############################################
+# SESIÓN GLOBAL PARA REUTILIZAR CONEXIÓN
+############################################
+SESSION = requests.Session()
 
 
 ############################################
@@ -46,8 +55,8 @@ def attempt_refresh() -> bool:
     refresh_token = read_file(REFRESH_TOKEN_FILE)
     host = read_file(HOST_FILE)
 
-    # Si no tenemos refresh_token o host configurado, no podemos refrescar.
     if not refresh_token or not host:
+        # Si no tenemos refresh_token o host configurado, no podemos refrescar.
         return False
 
     # Cabeceras para pedir refresh
@@ -59,7 +68,9 @@ def attempt_refresh() -> bool:
 
     url = f"{API_BASE_URL}/auth/refresh"
     try:
-        r = requests.post(url, headers=headers)
+        # 1) USAMOS SESSION.post EN LUGAR DE requests.post
+        r = SESSION.post(url, headers=headers)
+
         if r.status_code == 200:
             data = r.json()
             # El backend retorna algo como:
@@ -103,8 +114,6 @@ def request_with_refresh(method: str, endpoint: str, data=None, json=None, heade
     host = read_file(HOST_FILE)
 
     if not access_token or not host:
-        # Caso en que no hay credenciales -> no se puede hacer la petición
-        # Devolvemos un objeto 'Response' simulado o lanzamos excepción.
         raise Exception("No hay token de acceso o host configurado.")
 
     headers["Authorization"] = f"Bearer {access_token}"
@@ -113,8 +122,15 @@ def request_with_refresh(method: str, endpoint: str, data=None, json=None, heade
 
     url = f"{API_BASE_URL}{endpoint}"
 
-    # 1) Hacemos la petición original
-    response = requests.request(method, url, data=data, json=json, headers=headers, **kwargs)
+    # 1) Hacemos la petición original usando la SESIÓN
+    response = SESSION.request(
+        method=method,
+        url=url,
+        data=data,
+        json=json,
+        headers=headers,
+        **kwargs
+    )
 
     # 2) Si regresa 401, intentamos refrescar y reintentar
     if response.status_code == 401:
@@ -123,6 +139,13 @@ def request_with_refresh(method: str, endpoint: str, data=None, json=None, heade
             new_access_token = read_file(ACCESS_TOKEN_FILE)
             if new_access_token:
                 headers["Authorization"] = f"Bearer {new_access_token}"
-                response = requests.request(method, url, data=data, json=json, headers=headers, **kwargs)
+                response = SESSION.request(
+                    method=method,
+                    url=url,
+                    data=data,
+                    json=json,
+                    headers=headers,
+                    **kwargs
+                )
 
     return response
