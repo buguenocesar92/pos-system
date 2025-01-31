@@ -8,9 +8,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
-# Importa tu función de peticiones seguras (refresh)
 from utils import request_with_refresh
-
 
 class POSWindow(QWidget):
     def __init__(self):
@@ -18,43 +16,41 @@ class POSWindow(QWidget):
         self.setWindowTitle("Venta de Productos")
         self.resize(900, 500)
 
-        # Layout principal: contenedor horizontal
         main_layout = QHBoxLayout(self)
 
-        # ------------------ LADO IZQUIERDO ------------------
-        # Contiene: barra de búsqueda, tabla, paginación
+        # ------ LADO IZQUIERDO (Búsqueda, Tabla, Paginación) ------
         left_layout = QVBoxLayout()
 
-        # 1) Barra de búsqueda
+        # Barra de búsqueda
         search_layout = QHBoxLayout()
-        lbl_search = QLabel("Código del Producto:")
-        self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("Buscar producto...")
 
-        # Botón que usaremos para actualizar o buscar
-        self.btnActualizar = QPushButton("Actualizar Productos")
-        self.btnActualizar.clicked.connect(self.obtener_productos)
+        lbl_search = QLabel("Código de Barras:")
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Ingresa o escanea el código...")
+
+        # (1) Permitir búsqueda con Enter:
+        self.search_input.returnPressed.connect(self.on_search_barcode)
+
+        # Botón de búsqueda
+        self.btnBuscar = QPushButton("Buscar")
+        self.btnBuscar.clicked.connect(self.on_search_barcode)
 
         search_layout.addWidget(lbl_search)
         search_layout.addWidget(self.search_input)
-        search_layout.addWidget(self.btnActualizar)
+        search_layout.addWidget(self.btnBuscar)
         left_layout.addLayout(search_layout)
 
-        # 2) Tabla de productos
+        # Tabla
         self.table = QTableWidget()
-        # Definir columnas que se parezcan a las de tu diseño
         self.table.setColumnCount(5)
-        self.table.setHorizontalHeaderLabels(["Código de Barras", "Descripción", "Precio", "Cantidad", "Acciones"])
-        # Ajustar el modo de edición
+        self.table.setHorizontalHeaderLabels(["Código", "Descripción", "Precio", "Cantidad", "Acciones"])
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        # Ajustar las columnas para que ocupen todo el ancho
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        # Seleccionar toda la fila al hacer clic
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
 
         left_layout.addWidget(self.table)
 
-        # 3) Controles de paginación (opcional)
+        # Paginación (opcional)
         pagination_layout = QHBoxLayout()
         self.combo_items_per_page = QComboBox()
         self.combo_items_per_page.addItems(["5", "10", "20", "50"])
@@ -75,31 +71,22 @@ class POSWindow(QWidget):
 
         main_layout.addLayout(left_layout, stretch=3)
 
-        # ------------------ LADO DERECHO ------------------
-        # Contiene: Totales + botones (Confirmar, Cancelar, Cerrar Caja)
+        # ------ LADO DERECHO (Totales, Botones) ------
         right_layout = QVBoxLayout()
 
-        # Título totales
-        label_totales = QLabel("Totales")
-        label_totales.setStyleSheet("font-weight: bold; font-size: 16px;")
-        right_layout.addWidget(label_totales, alignment=Qt.AlignmentFlag.AlignLeft)
+        lbl_totales = QLabel("Totales")
+        lbl_totales.setStyleSheet("font-weight: bold; font-size: 16px;")
+        right_layout.addWidget(lbl_totales, alignment=Qt.AlignmentFlag.AlignLeft)
 
-        # Label para mostrar total
         self.label_total_amount = QLabel("Total: $0.00")
         self.label_total_amount.setStyleSheet("font-size: 14px;")
         right_layout.addWidget(self.label_total_amount, alignment=Qt.AlignmentFlag.AlignLeft)
 
         right_layout.addSpacing(20)
 
-        # Botones de acción
         self.btn_confirmar_venta = QPushButton("CONFIRMAR VENTA")
         self.btn_cancelar_venta = QPushButton("CANCELAR VENTA")
         self.btn_cerrar_caja = QPushButton("CERRAR CAJA")
-
-        # Si quieres conectar funciones:
-        # self.btn_confirmar_venta.clicked.connect(self.on_confirmar_venta)
-        # self.btn_cancelar_venta.clicked.connect(self.on_cancelar_venta)
-        # self.btn_cerrar_caja.clicked.connect(self.on_cerrar_caja)
 
         right_layout.addWidget(self.btn_confirmar_venta)
         right_layout.addWidget(self.btn_cancelar_venta)
@@ -107,110 +94,115 @@ class POSWindow(QWidget):
         right_layout.addStretch()
 
         main_layout.addLayout(right_layout, stretch=1)
+        self.setLayout(main_layout)
 
-        # (Opcional) Llenar tabla con algún ejemplo inicial
-        self.populate_initial_example()
+    # -------------------------------------------------
+    # FUNCIÓN para BUSCAR un producto: /products/barcode/{barcode}
+    # -------------------------------------------------
+    def on_search_barcode(self):
+        barcode = self.search_input.text().strip()
+        if not barcode:
+            QMessageBox.warning(self, "Atención", "Ingresa un código de barras.")
+            return
 
-    def populate_initial_example(self):
-        """Datos de prueba (puedes omitirlo o cargar datos en obtener_productos)."""
-        self.table.setRowCount(1)
-        self.table.setItem(0, 0, QTableWidgetItem("074312038228"))  # Código
-        self.table.setItem(0, 1, QTableWidgetItem("Omega 3"))       # Descripción
-        self.table.setItem(0, 2, QTableWidgetItem("$138.00"))       # Precio
-
-        # SpinBox para la cantidad
-        spin_cantidad = QSpinBox()
-        spin_cantidad.setRange(1, 9999)
-        spin_cantidad.setValue(1)
-        self.table.setCellWidget(0, 3, spin_cantidad)
-
-        # Botón de eliminar (o acción)
-        btn_delete = QPushButton("🗑")
-        # btn_delete.clicked.connect(lambda: self.on_delete_item(0))
-        self.table.setCellWidget(0, 4, btn_delete)
-
-        # Actualizar total
-        self.label_total_amount.setText("Total: $138.00")
-
-    def obtener_productos(self):
-        """
-        Llama a la API /products usando el token (con soporte de refresh).
-        Carga los productos en la tabla.
-        """
         try:
-            response = request_with_refresh("GET", "/products")
+            endpoint = f"/products/barcode/{barcode}"
+            response = request_with_refresh("GET", endpoint)
+            
             if response.status_code == 200:
-                productos = response.json().get("items", [])
-                self.cargar_en_tabla(productos)
+                product = response.json()
+                row_found = self.find_table_row_by_barcode(product.get("barcode", ""))
+                if row_found is not None:
+                    # Producto ya existe => aumentar la cantidad
+                    spin = self.table.cellWidget(row_found, 3)
+                    if spin:
+                        spin.setValue(spin.value() + 1)
+                    self.recalcular_total()
+                else:
+                    # Nuevo producto => agregar fila
+                    self.add_product_to_table(product)
+
+            elif response.status_code == 404:
+                QMessageBox.information(self, "Sin resultados", "No se encontró producto con ese código.")
             elif response.status_code == 401:
-                # Significa que ni refrescando se pudo
-                QMessageBox.critical(
-                    self, "Error",
-                    "Tu token ha expirado y no se pudo refrescar. Por favor, inicia sesión de nuevo."
-                )
+                QMessageBox.critical(self, "Error", "Token expirado/no válido y no se pudo refrescar.")
             else:
                 QMessageBox.critical(
                     self, "Error",
-                    f"Error al obtener productos: {response.status_code}"
+                    f"Error al buscar producto. Código HTTP: {response.status_code}"
                 )
+
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
 
-    def cargar_en_tabla(self, productos):
-        """
-        Llena la tabla con la lista de productos que devuelva tu API.
-        Cada producto se asume que tiene: { 'barcode', 'name', 'unit_price' }
-        Ajusta según la estructura real de tu respuesta.
-        """
-        self.table.clearContents()
-        self.table.setRowCount(len(productos))
+        # <--- Aquí limpiamos el input, ocurra lo que ocurra arriba.
+        self.search_input.clear()
 
+
+    # -------------------------------------------------
+    # Busca si ya existe el barcode en la tabla
+    # Retorna el índice de fila si lo encuentra, None si no
+    # -------------------------------------------------
+    def find_table_row_by_barcode(self, barcode):
+        row_count = self.table.rowCount()
+        for row in range(row_count):
+            item_barcode = self.table.item(row, 0)  # Columna 0 => Código
+            if item_barcode and item_barcode.text() == barcode:
+                return row
+        return None
+
+    # -------------------------------------------------
+    # Si no existe, insertamos una nueva fila con los datos
+    # -------------------------------------------------
+    def add_product_to_table(self, product):
+        row_idx = self.table.rowCount()
+        self.table.insertRow(row_idx)
+
+        barcode = str(product.get("barcode", ""))
+        name = str(product.get("name", ""))
+        price_val = float(product.get("unit_price", 0.0))
+
+        self.table.setItem(row_idx, 0, QTableWidgetItem(barcode))
+        self.table.setItem(row_idx, 1, QTableWidgetItem(name))
+        self.table.setItem(row_idx, 2, QTableWidgetItem(f"${price_val:.2f}"))
+
+        # SpinBox de cantidad
+        spin_cantidad = QSpinBox()
+        spin_cantidad.setRange(1, 9999)
+        spin_cantidad.setValue(1)
+        # Al cambiar la cantidad => recalculamos
+        spin_cantidad.valueChanged.connect(self.recalcular_total)
+        self.table.setCellWidget(row_idx, 3, spin_cantidad)
+
+        # Botón Eliminar
+        btn_delete = QPushButton("🗑")
+        btn_delete.clicked.connect(lambda _, r=row_idx: self.on_delete_item(r))
+        self.table.setCellWidget(row_idx, 4, btn_delete)
+
+        # Recalcular total
+        self.recalcular_total()
+
+    # -------------------------------------------------
+    # Eliminar fila => removeRow
+    # -------------------------------------------------
+    def on_delete_item(self, row_idx):
+        self.table.removeRow(row_idx)
+        self.recalcular_total()
+
+    # -------------------------------------------------
+    # Recalcular total => iterar filas
+    # -------------------------------------------------
+    def recalcular_total(self):
         total = 0.0
+        row_count = self.table.rowCount()
 
-        for row_idx, prod in enumerate(productos):
-            barcode = str(prod.get("barcode", ""))
-            name = str(prod.get("name", ""))
-            price_val = prod.get("unit_price", 0.0)
+        for row in range(row_count):
+            price_str = self.table.item(row, 2).text()  # ej: "$123.45"
+            price_val = float(price_str.replace("$", ""))
 
-            self.table.setItem(row_idx, 0, QTableWidgetItem(barcode))
-            self.table.setItem(row_idx, 1, QTableWidgetItem(name))
-            self.table.setItem(row_idx, 2, QTableWidgetItem(f"${price_val:.2f}"))
+            spin = self.table.cellWidget(row, 3)
+            quantity = spin.value() if spin else 1
 
-            # SpinBox para cantidad (por defecto 1)
-            spin_cantidad = QSpinBox()
-            spin_cantidad.setRange(1, 9999)
-            spin_cantidad.setValue(1)
-            # Podrías conectar un método para recalcular total al cambiar
-            # spin_cantidad.valueChanged.connect(lambda val, row=row_idx, unit=price_val: self.recalcular_total(val, unit, row))
-            self.table.setCellWidget(row_idx, 3, spin_cantidad)
-
-            # Botón eliminar
-            btn_delete = QPushButton("🗑")
-            # btn_delete.clicked.connect(lambda checked, r=row_idx: self.on_delete_item(r))
-            self.table.setCellWidget(row_idx, 4, btn_delete)
-
-            # Sumar al total (price_val * 1)
-            total += price_val
+            total += price_val * quantity
 
         self.label_total_amount.setText(f"Total: ${total:.2f}")
-
-    # Ejemplos opcionales de funciones de apoyo:
-    # def on_delete_item(self, row_idx):
-    #     self.table.removeRow(row_idx)
-    #     # Ajustar total en consecuencia...
-
-    # def recalcular_total(self, cantidad, unit_price, row):
-    #     # Recalcular total general en base a todos los rows, etc.
-    #     pass
-
-    # def on_confirmar_venta(self):
-    #     # Lógica para enviar la venta
-    #     pass
-
-    # def on_cancelar_venta(self):
-    #     # Lógica para cancelar
-    #     pass
-
-    # def on_cerrar_caja(self):
-    #     # Lógica para cerrar caja
-    #     pass
