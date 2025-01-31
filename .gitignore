@@ -6,6 +6,8 @@ __pycache__/
 # Archivos de configuración sensibles
 auth_token.txt
 host_config.txt
+access_token.txt
+refresh_token.txt
 
 # Archivos y carpetas del sistema operativo
 .DS_Store
