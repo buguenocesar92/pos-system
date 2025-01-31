@@ -1,7 +1,14 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox
+# windows/login.py
 import requests
-from constants import API_BASE_URL, TOKEN_FILE, HOST_FILE
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox
+
 from utils import write_file, read_file
+from constants import (
+    API_BASE_URL,
+    ACCESS_TOKEN_FILE,
+    REFRESH_TOKEN_FILE,
+    HOST_FILE
+)
 from windows.pos import POSWindow
 
 class LoginWindow(QWidget):
@@ -39,26 +46,44 @@ class LoginWindow(QWidget):
         if not host:
             QMessageBox.critical(self, "Error", "El Host no está configurado.")
             return
+        if not email or not password:
+            QMessageBox.critical(self, "Error", "Por favor completa los campos de email y password.")
+            return
+
+        url = f"{API_BASE_URL}/auth/login"
+
+        # Tu backend: un POST a /auth/login
+        # Ej. si requiere JSON => json={"email": ..., "password": ...}
+        # Si requiere form-data => data={...}
+        # Ajusta según corresponda:
+        data = {
+            "email": email,
+            "password": password
+        }
+        headers = {
+            "Accept": "application/json",
+            "Host": host
+        }
 
         try:
-            response = requests.post(
-                f"{API_BASE_URL}/auth/login",
-                headers={
-                    "Accept": "*/*",
-                    "User-Agent": "PyQt POS",
-                    "Host": host,
-                },
-                data={"email": email, "password": password}
-            )
+            # Usamos data= en vez de json= si tu login espera form-data;
+            # Cambia a `json=data` si espera JSON.
+            response = requests.post(url, headers=headers, data=data)
 
             if response.status_code == 200:
-                token = response.json().get("access_token")
-                if token:
-                    write_file(TOKEN_FILE, token)
+                resp_json = response.json()
+                access_token = resp_json.get("access_token")
+                refresh_token = resp_json.get("refresh_token")
+
+                if access_token and refresh_token:
+                    # Guardamos ambos tokens
+                    write_file(ACCESS_TOKEN_FILE, access_token)
+                    write_file(REFRESH_TOKEN_FILE, refresh_token)
+
                     QMessageBox.information(self, "Éxito", "Inicio de sesión exitoso.")
                     self.open_pos()
                 else:
-                    QMessageBox.critical(self, "Error", "No se pudo obtener el token.")
+                    QMessageBox.critical(self, "Error", "No se obtuvieron los tokens en la respuesta.")
             else:
                 QMessageBox.critical(self, "Error", f"Error al iniciar sesión. Código: {response.status_code}")
 
