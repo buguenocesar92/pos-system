@@ -1,3 +1,4 @@
+# windows/host_config.py
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox
 from utils import write_file
 from constants import HOST_FILE
