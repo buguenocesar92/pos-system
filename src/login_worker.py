@@ -1,8 +1,8 @@
-# login_worker.py
 from PyQt6.QtCore import QThread, pyqtSignal
 import requests
-from constants import API_BASE_URL, ACCESS_TOKEN_FILE, REFRESH_TOKEN_FILE, HOST_FILE
-from utils import read_file, write_file
+
+from src.constants import API_BASE_URL, ACCESS_TOKEN_FILE, REFRESH_TOKEN_FILE, HOST_FILE
+from src.utils import read_file, write_file
 
 class LoginWorker(QThread):
     # Emite el resultado: un diccionario con la respuesta en caso de éxito, o una excepción en caso de error.

@@ -1,8 +1,8 @@
 # sync.py
 
 import datetime
-from utils import request_with_refresh
-from local_db import init_db, save_products
+from src.utils import request_with_refresh
+from src.local_db import init_db, save_products
 
 def sync_all_products():
     """

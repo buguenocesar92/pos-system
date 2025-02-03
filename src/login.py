@@ -1,15 +1,15 @@
-# src/windows/login.py
+# src/login.py
 
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox
 from PyQt6.QtGui import QFont, QGuiApplication
 from PyQt6.QtCore import Qt
 from qt_material import apply_stylesheet
 
-from constants import API_BASE_URL, ACCESS_TOKEN_FILE, REFRESH_TOKEN_FILE, HOST_FILE
-from windows.pos import POSWindow
-from sync_worker import SyncWorker
-from loading_dialog import MaterialLoadingDialog
-from login_worker import LoginWorker
+from src.constants import API_BASE_URL, ACCESS_TOKEN_FILE, REFRESH_TOKEN_FILE, HOST_FILE
+from src.pos import POSWindow
+from src.sync_worker import SyncWorker
+from src.loading_dialog import MaterialLoadingDialog
+from src.login_worker import LoginWorker
 
 class LoginWindow(QWidget):
     def __init__(self):
@@ -143,7 +143,7 @@ class LoginWindow(QWidget):
             return
 
         # Luego de la sincronización, se consulta el estado de la caja
-        from windows.check_cash_register_status_worker import CheckCashRegisterStatusWorker
+        from src.check_cash_register_status_worker import CheckCashRegisterStatusWorker
         self.status_worker = CheckCashRegisterStatusWorker()
         self.status_worker.finished.connect(self.handle_status_finished)
         self.status_worker.start()
@@ -160,7 +160,7 @@ class LoginWindow(QWidget):
             self.pos_window.show()
         else:
             # Si la caja está cerrada, se muestra la ventana de apertura de caja.
-            from windows.apertura_caja import AperturaCajaWindow
+            from src.apertura_caja import AperturaCajaWindow
             self.apertura_caja_window = AperturaCajaWindow()
             self.apertura_caja_window.show()
 

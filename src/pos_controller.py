@@ -1,10 +1,9 @@
-# windows/pos_controller.py
 
 from PyQt6.QtWidgets import QMessageBox, QTableWidgetItem, QPushButton
 from PyQt6.QtCore import QTimer
 
-from local_db import get_product_by_barcode, init_db
-from sync import sync_all_products
+from src.local_db import get_product_by_barcode, init_db
+from src.sync import sync_all_products
 
 def connect_signals(pos_window):
     """

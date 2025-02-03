@@ -1,9 +1,11 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox
 from PyQt6.QtGui import QFont, QGuiApplication
 from PyQt6.QtCore import Qt
-from utils import write_file
-from constants import HOST_FILE
-from windows.login import LoginWindow
+
+from src.utils import write_file
+from src.constants import HOST_FILE
+from src.login import LoginWindow
+
 
 class HostConfigWindow(QWidget):
     def __init__(self):

@@ -1,5 +1,5 @@
 from PyQt6.QtCore import QThread, pyqtSignal
-from utils import request_with_refresh
+from src.utils import request_with_refresh
 
 class WorkerThread(QThread):
     """

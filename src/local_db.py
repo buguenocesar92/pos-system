@@ -2,7 +2,7 @@
 
 import sqlite3
 import os
-from constants import DB_FILE
+from src.constants import DB_FILE
 
 def init_db():
     """

@@ -1,5 +1,5 @@
 from PyQt6.QtCore import QThread, pyqtSignal
-from sync import sync_all_products
+from src.sync import sync_all_products
 
 
 class SyncWorker(QThread):

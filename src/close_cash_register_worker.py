@@ -2,8 +2,8 @@
 
 from PyQt6.QtCore import QThread, pyqtSignal
 import requests
-from constants import API_BASE_URL, ACCESS_TOKEN_FILE, HOST_FILE
-from utils import read_file
+from src.constants import API_BASE_URL, ACCESS_TOKEN_FILE, HOST_FILE
+from src.utils import read_file
 
 class CloseCashRegisterWorker(QThread):
     """

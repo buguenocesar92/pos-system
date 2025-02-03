@@ -1,4 +1,4 @@
-# src/windows/pos.py
+# src/pos.py
 
 import os
 from PyQt6.QtWidgets import (
@@ -6,12 +6,12 @@ from PyQt6.QtWidgets import (
     QSpinBox, QPushButton
 )
 from PyQt6.QtCore import Qt
-from local_db import init_db, get_product_by_barcode
-from windows.pos_layout import build_left_container, build_right_container
-from windows.pos_controller import connect_signals
-from sync import sync_all_products
-from sync_worker import SyncWorker   # Asegúrate de importar la clase SyncWorker
-from workers import WorkerThread     # Importamos el WorkerThread extraído
+from src.local_db import init_db, get_product_by_barcode
+from src.pos_layout import build_left_container, build_right_container
+from src.pos_controller import connect_signals
+from src.sync import sync_all_products
+from src.sync_worker import SyncWorker   # Asegúrate de importar la clase SyncWorker
+from src.workers import WorkerThread     # Importamos el WorkerThread extraído
 
 # Diálogo de carga para registrar ventas
 class LoadingDialog(QDialog):

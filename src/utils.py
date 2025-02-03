@@ -1,7 +1,7 @@
 # utils.py
 
 import requests
-from constants import (
+from src.constants import (
     API_BASE_URL,
     ACCESS_TOKEN_FILE,
     REFRESH_TOKEN_FILE,
