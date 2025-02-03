@@ -11,7 +11,7 @@ def build_left_container(parent) -> QFrame:
     """
     Crea el contenedor izquierdo (búsqueda, tabla, paginación).
     'parent' es la instancia de POSWindow (o quien la use),
-    donde se asignan propiedades como parent.table, parent.search_input...
+    donde se asignan propiedades como parent.table, parent.search_input, etc.
     """
     container = QFrame()
     container.setObjectName("LeftContainer")
@@ -106,6 +106,7 @@ def build_right_container(parent) -> QFrame:
     parent.btn_cancelar_venta = QPushButton("CANCELAR VENTA")
     parent.btn_cancelar_venta.setObjectName("CancelBtn")
 
+    # Nota: Utilizamos el nombre "btn_cerrar_caja" para que coincida con la conexión de señales en el controlador.
     parent.btn_cerrar_caja = QPushButton("CERRAR CAJA")
     parent.btn_cerrar_caja.setObjectName("CloseBtn")
 
