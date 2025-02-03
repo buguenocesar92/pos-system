@@ -2,6 +2,7 @@
 venv/
 *.pyc
 __pycache__/
+build/
 
 # Archivos de configuración sensibles
 auth_token.txt
