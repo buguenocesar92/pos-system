@@ -1,13 +1,15 @@
-# sync_worker.py
 from PyQt6.QtCore import QThread, pyqtSignal
-from sync import sync_all_products  # Asegúrate de que sync_all_products esté correctamente definido
+from sync import sync_all_products
+
 
 class SyncWorker(QThread):
-    finished = pyqtSignal(object)  # Emitirá un mensaje de éxito o la excepción ocurrida
+    """Hilo para sincronizar productos con la nube."""
+    finished = pyqtSignal(object)
 
     def run(self):
+        """Ejecuta la sincronización en un hilo secundario."""
         try:
-            sync_all_products()  # Ejecuta la sincronización
-            self.finished.emit("Sincronización completada.")
+            result = sync_all_products()
+            self.finished.emit(result)  # Emite el resultado si todo va bien
         except Exception as e:
-            self.finished.emit(e)
+            self.finished.emit(e)  # Emite el error en caso de fallo
