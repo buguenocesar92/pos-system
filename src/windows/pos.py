@@ -2,14 +2,14 @@ import os
 from PyQt6.QtWidgets import (
     QWidget, QHBoxLayout, QDialog, QLabel, QMessageBox, QTableWidgetItem, QSpinBox, QPushButton
 )
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtCore import Qt
 
 from local_db import init_db, get_product_by_barcode
 from windows.pos_layout import build_left_container, build_right_container
 from windows.pos_controller import connect_signals
 from sync import sync_all_products
-from utils import request_with_refresh
 from sync_worker import SyncWorker  # Asegúrate de importar la clase SyncWorker
+from workers import WorkerThread    # Importamos el WorkerThread extraído
 
 
 class LoadingDialog(QDialog):
@@ -23,23 +23,6 @@ class LoadingDialog(QDialog):
         layout = QHBoxLayout(self)
         self.label = QLabel("Registrando venta, por favor espere...")
         layout.addWidget(self.label)
-
-
-class WorkerThread(QThread):
-    """Hilo para procesar la venta sin bloquear la UI."""
-    finished = pyqtSignal(object)  # Señal para enviar la respuesta al hilo principal
-
-    def __init__(self, payload):
-        super().__init__()
-        self.payload = payload
-
-    def run(self):
-        """Ejecuta la petición en un hilo secundario."""
-        try:
-            response = request_with_refresh("POST", "/sales", json=self.payload)
-            self.finished.emit(response)  # Enviamos la respuesta
-        except Exception as e:
-            self.finished.emit(e)  # Enviamos el error
 
 
 class POSWindow(QWidget):
@@ -133,7 +116,6 @@ class POSWindow(QWidget):
             print(f"Error en sincronización: {result}")  # Imprime el error en la consola
         else:
             print(result)  # Imprime el mensaje de éxito en la consola
-
 
     def on_confirmar_venta(self):
         """
