@@ -1,14 +1,13 @@
 # sync_worker.py
 from PyQt6.QtCore import QThread, pyqtSignal
-from sync import sync_all_products
+from sync import sync_all_products  # Asegúrate de que sync_all_products esté correctamente definido
 
 class SyncWorker(QThread):
-    # Señal que enviará un mensaje o excepción al terminar
-    finished = pyqtSignal(object)
+    finished = pyqtSignal(object)  # Emitirá un mensaje de éxito o la excepción ocurrida
 
     def run(self):
         try:
             sync_all_products()  # Ejecuta la sincronización
-            self.finished.emit("Sincronización completada.")  # Emite un mensaje de éxito
+            self.finished.emit("Sincronización completada.")
         except Exception as e:
-            self.finished.emit(e)  # Emite el error en caso de excepción
+            self.finished.emit(e)
