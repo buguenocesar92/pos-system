@@ -24,7 +24,7 @@ class LoginWindow(QWidget):
 
         # Estilo de etiqueta del título
         self.label_email = QLabel("Correo Electrónico")
-        self.label_email.setFont(QFont("Arial", 10))
+        self.label_email.setFont(QFont("Arial", 10, QFont.Weight.Bold))
         layout.addWidget(self.label_email)
 
         # Input de correo
@@ -48,7 +48,7 @@ class LoginWindow(QWidget):
 
         # Estilo de etiqueta de contraseña
         self.label_password = QLabel("Contraseña")
-        self.label_password.setFont(QFont("Arial", 10))
+        self.label_password.setFont(QFont("Arial", 10, QFont.Weight.Bold))
         layout.addWidget(self.label_password)
 
         # Input de contraseña
