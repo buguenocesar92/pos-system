@@ -35,7 +35,7 @@ class POSWindow(QWidget):
         init_db()  # Crea/actualiza la base local
 
         self.setWindowTitle("Venta de Productos")
-        self.resize(900, 500)
+        self.showMaximized() 
 
         # 1) Construir la interfaz
         self._init_main_layout()
