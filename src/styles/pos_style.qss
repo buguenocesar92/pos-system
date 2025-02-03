@@ -1,0 +1,101 @@
+/* Estilo básico: todo el fondo del POS en blanco */
+QWidget {
+    background-color: white;
+}
+
+/* El panel o frame izquierdo donde está la búsqueda y la tabla */
+#LeftFrame {
+    /* Si quieres dejarlo también en blanco sin borde, puedes omitir estas líneas. 
+       Caso contrario, lo normal es hacerlo "tarjeta" con borde. */
+    background-color: white;
+    border: 1px solid #E0E0E0;
+    border-radius: 6px;
+    padding: 10px;
+}
+
+/* El panel derecho donde está Totales y los botones */
+#RightFrame {
+    background-color: #F3F3F3; 
+    border: 1px solid #DDDDDD;
+    border-radius: 6px;
+    padding: 10px;
+}
+
+/* Encabezado de la tabla */
+QTableWidget {
+    border: none;                /* sin borde alrededor de la tabla */
+    gridline-color: #E0E0E0;     /* color de líneas de la grilla */
+    selection-background-color: #BBDEFB; /* color de selección de filas */
+}
+QHeaderView::section {
+    background-color: #FAFAFA;
+    font-weight: bold;
+    border: 1px solid #E0E0E0;
+}
+
+/* LineEdit de búsqueda */
+QLineEdit {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 4px;
+}
+QLineEdit:focus {
+    border: 1px solid #66AFE9;
+}
+
+/* Combobox y botones de paginación */
+QComboBox {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 2px;
+}
+QPushButton {
+    border-radius: 4px;
+    padding: 6px 12px;
+}
+QPushButton:hover {
+    background-color: #EEE;  /* color de hover genérico */
+}
+
+/* Botones de acción principales: verde, rojo, azul */
+QPushButton#ConfirmBtn {
+    background-color: #99D19C; /* Verde */
+    color: white;
+    font-weight: bold;
+    border: none;
+}
+QPushButton#ConfirmBtn:hover {
+    background-color: #8CC08F;
+}
+
+QPushButton#CancelBtn {
+    background-color: #E57373; /* Rojo */
+    color: white;
+    font-weight: bold;
+    border: none;
+}
+QPushButton#CancelBtn:hover {
+    background-color: #D86363;
+}
+
+QPushButton#CloseBtn {
+    background-color: #64B5F6; /* Azul */
+    color: white;
+    font-weight: bold;
+    border: none;
+}
+QPushButton#CloseBtn:hover {
+    background-color: #54A5E0;
+}
+
+/* Opcional: label para "Totales" en negrita */
+QLabel#TitleTotals {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* Label para el monto total */
+QLabel#TotalAmount {
+    font-size: 14px;
+    color: #333;
+}
