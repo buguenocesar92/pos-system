@@ -21,6 +21,7 @@ def connect_signals(pos_window):
     # Botón Confirmar Venta
     pos_window.btn_confirmar_venta.clicked.connect(pos_window.on_confirmar_venta)
     # Podrías conectar Cancelar, Cerrar Caja, etc.
+    pos_window.btn_cancelar_venta.clicked.connect(pos_window.on_cancelar_venta)
 
     # Timer autsync
     pos_window.timer = QTimer(pos_window)

@@ -103,7 +103,6 @@ class POSWindow(QWidget):
         """
         Sincroniza manualmente los productos con la nube en un hilo separado sin bloquear la UI.
         """
-        # Crear y lanzar el worker thread para sincronización
         self.sync_worker = SyncWorker()
         self.sync_worker.finished.connect(self.handle_sync_finished)
         self.sync_worker.start()
@@ -113,13 +112,13 @@ class POSWindow(QWidget):
         Maneja el resultado del hilo de sincronización sin mostrar un diálogo.
         """
         if isinstance(result, Exception):
-            print(f"Error en sincronización: {result}")  # Imprime el error en la consola
+            print(f"Error en sincronización: {result}")
         else:
-            print(result)  # Imprime el mensaje de éxito en la consola
+            print(result)
 
     def on_confirmar_venta(self):
         """
-        Registra la venta usando hilos (`QThread`) para evitar congelar la UI.
+        Registra la venta usando hilos (QThread) para evitar congelar la UI.
         """
         items = []
         row_count = self.table.rowCount()
@@ -145,11 +144,9 @@ class POSWindow(QWidget):
             QMessageBox.warning(self, "Atención", "No hay productos para registrar la venta.")
             return
 
-        # Mostrar el diálogo de carga
         self.loading_dialog = LoadingDialog(self)
         self.loading_dialog.show()
 
-        # Crear y lanzar el worker thread
         self.worker = WorkerThread(payload={"items": items})
         self.worker.finished.connect(self.handle_finished)
         self.worker.start()
@@ -158,7 +155,7 @@ class POSWindow(QWidget):
         """
         Maneja la respuesta del hilo secundario.
         """
-        self.loading_dialog.close()  # Ocultar el diálogo de carga
+        self.loading_dialog.close()
 
         if isinstance(result, Exception):
             QMessageBox.critical(self, "Error", str(result))
@@ -179,7 +176,26 @@ class POSWindow(QWidget):
         print("Auto-sync completado.")
 
     # ----------------------------------------------------------------
-    # Métodos de apoyo
+    # Método para Cancelar la Venta
+    # ----------------------------------------------------------------
+    def on_cancelar_venta(self):
+        """
+        Cancela la venta borrando todos los productos de la tabla.
+        Solicita confirmación antes de cancelar.
+        """
+        confirm = QMessageBox.question(
+            self,
+            "Cancelar Venta",
+            "¿Estás seguro de que deseas cancelar la venta?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
+        )
+        if confirm == QMessageBox.StandardButton.Yes:
+            self._clear_table_and_total()
+            QMessageBox.information(self, "Venta Cancelada", "La venta ha sido cancelada exitosamente.")
+
+    # ----------------------------------------------------------------
+    # Métodos de Apoyo
     # ----------------------------------------------------------------
     def add_product_to_table(self, product: dict):
         """
@@ -249,6 +265,9 @@ class POSWindow(QWidget):
         self.recalcular_total()
 
     def _clear_table_and_total(self):
+        """
+        Borra el contenido de la tabla, resetea el total y limpia el campo de búsqueda.
+        """
         self.table.clearContents()
         self.table.setRowCount(0)
         self.label_total_amount.setText("Total: $0.00")
