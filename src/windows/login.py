@@ -1,3 +1,5 @@
+# src/windows/login.py
+
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox
 from PyQt6.QtGui import QFont, QGuiApplication
 from PyQt6.QtCore import Qt
@@ -22,7 +24,7 @@ class LoginWindow(QWidget):
         layout.setContentsMargins(30, 30, 30, 30)
         layout.setSpacing(15)
 
-        # Estilo de etiqueta del título
+        # Etiqueta de correo electrónico
         self.label_email = QLabel("Correo Electrónico")
         self.label_email.setFont(QFont("Arial", 10, QFont.Weight.Bold))
         layout.addWidget(self.label_email)
@@ -46,7 +48,7 @@ class LoginWindow(QWidget):
         """)
         layout.addWidget(self.email_input)
 
-        # Estilo de etiqueta de contraseña
+        # Etiqueta de contraseña
         self.label_password = QLabel("Contraseña")
         self.label_password.setFont(QFont("Arial", 10, QFont.Weight.Bold))
         layout.addWidget(self.label_password)
@@ -71,7 +73,7 @@ class LoginWindow(QWidget):
         """)
         layout.addWidget(self.password_input)
 
-        # Botón de login con estilo Material
+        # Botón de login
         self.login_button = QPushButton("Iniciar Sesión")
         self.login_button.setStyleSheet("""
             QPushButton {
@@ -93,18 +95,13 @@ class LoginWindow(QWidget):
         layout.addWidget(self.login_button)
 
         self.setLayout(layout)
-
-        # Centrar la ventana en la pantalla
         self.center_window()
 
     def center_window(self):
         """ Centra la ventana en la pantalla. """
         screen_geometry = QGuiApplication.primaryScreen().geometry()
-        window_geometry = self.frameGeometry()
-
         center_x = (screen_geometry.width() - self.width()) // 2
         center_y = (screen_geometry.height() - self.height()) // 2
-
         self.move(center_x, center_y)
 
     def login(self):
@@ -115,11 +112,11 @@ class LoginWindow(QWidget):
             QMessageBox.critical(self, "Error", "Completa los campos de email y password.")
             return
 
-        # Mostrar el loading inmediatamente con el mensaje de login
+        # Mostrar el diálogo de carga
         self.loading_dialog = MaterialLoadingDialog(self, "Iniciando sesión, por favor espere...")
         self.loading_dialog.show()
 
-        # Iniciar el LoginWorker en segundo plano
+        # Iniciar LoginWorker en segundo plano
         self.login_worker = LoginWorker(email, password)
         self.login_worker.finished.connect(self.handle_login_finished)
         self.login_worker.start()
@@ -129,12 +126,12 @@ class LoginWindow(QWidget):
             self.loading_dialog.close()
             QMessageBox.critical(self, "Error de login", str(result))
         else:
-            # Login exitoso: actualizar el mensaje del loading y comenzar la sincronización
+            # Login exitoso: se actualiza el mensaje y se inicia la sincronización
             self.loading_dialog.label.setText("Sincronizando productos, por favor espere...")
             self.start_sync()
 
     def start_sync(self):
-        # Iniciar la sincronización en segundo plano
+        # Iniciar SyncWorker en segundo plano
         self.sync_worker = SyncWorker()
         self.sync_worker.finished.connect(self.handle_sync_finished)
         self.sync_worker.start()
@@ -143,7 +140,28 @@ class LoginWindow(QWidget):
         self.loading_dialog.close()
         if isinstance(result, Exception):
             QMessageBox.warning(self, "Error de sincronización", f"Hubo un error al sincronizar: {result}")
-        # Abrir la ventana del POS
-        self.pos_window = POSWindow()
-        self.pos_window.show()
+            return
+
+        # Luego de la sincronización, se consulta el estado de la caja
+        from windows.check_cash_register_status_worker import CheckCashRegisterStatusWorker
+        self.status_worker = CheckCashRegisterStatusWorker()
+        self.status_worker.finished.connect(self.handle_status_finished)
+        self.status_worker.start()
+
+    def handle_status_finished(self, result):
+        if isinstance(result, Exception):
+            QMessageBox.critical(self, "Error", f"Error al consultar el estado de la caja: {result}")
+            return
+
+        # Se asume que la respuesta es un JSON con la clave "is_open"
+        if result.get("is_open", False):
+            # Si la caja está abierta, se abre el POS directamente.
+            self.pos_window = POSWindow()
+            self.pos_window.show()
+        else:
+            # Si la caja está cerrada, se muestra la ventana de apertura de caja.
+            from windows.apertura_caja import AperturaCajaWindow
+            self.apertura_caja_window = AperturaCajaWindow()
+            self.apertura_caja_window.show()
+
         self.close()
