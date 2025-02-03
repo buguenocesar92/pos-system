@@ -1,17 +1,19 @@
+# src/windows/pos.py
+
 import os
 from PyQt6.QtWidgets import (
-    QWidget, QHBoxLayout, QDialog, QLabel, QMessageBox, QTableWidgetItem, QSpinBox, QPushButton
+    QWidget, QHBoxLayout, QDialog, QLabel, QMessageBox, QTableWidgetItem,
+    QSpinBox, QPushButton
 )
 from PyQt6.QtCore import Qt
-
 from local_db import init_db, get_product_by_barcode
 from windows.pos_layout import build_left_container, build_right_container
 from windows.pos_controller import connect_signals
 from sync import sync_all_products
-from sync_worker import SyncWorker  # Asegúrate de importar la clase SyncWorker
-from workers import WorkerThread    # Importamos el WorkerThread extraído
+from sync_worker import SyncWorker   # Asegúrate de importar la clase SyncWorker
+from workers import WorkerThread     # Importamos el WorkerThread extraído
 
-
+# Diálogo de carga para registrar ventas
 class LoadingDialog(QDialog):
     """Diálogo modal con un mensaje de carga."""
     def __init__(self, parent=None):
@@ -19,16 +21,14 @@ class LoadingDialog(QDialog):
         self.setWindowTitle("Procesando...")
         self.setModal(True)
         self.setFixedSize(250, 100)
-
         layout = QHBoxLayout(self)
         self.label = QLabel("Registrando venta, por favor espere...")
         layout.addWidget(self.label)
 
-
 class POSWindow(QWidget):
     """Ventana principal del POS, maneja la búsqueda de productos y su visualización."""
-
-    SYNC_INTERVAL_MS = 1 * 60 * 1000  # 5 minutos
+    
+    SYNC_INTERVAL_MS = 1 * 60 * 1000  # 1 minuto (ajusta según lo necesario)
 
     def __init__(self):
         super().__init__()
@@ -43,7 +43,7 @@ class POSWindow(QWidget):
         # 2) Cargar estilos
         self._load_stylesheet()
 
-        # 3) Conectar eventos
+        # 3) Conectar eventos (definidos en pos_controller.py)
         connect_signals(self)
 
     def _init_main_layout(self):
@@ -75,9 +75,7 @@ class POSWindow(QWidget):
     # Métodos de Lógica / Eventos
     # ----------------------------------------------------------------
     def on_search_barcode(self):
-        """
-        Maneja la búsqueda de un producto por código de barras.
-        """
+        """Maneja la búsqueda de un producto por código de barras."""
         barcode = self.search_input.text().strip()
         if not barcode:
             QMessageBox.warning(self, "Atención", "Ingresa un código de barras.")
@@ -100,26 +98,20 @@ class POSWindow(QWidget):
         self.search_input.clear()
 
     def on_sync_products(self):
-        """
-        Sincroniza manualmente los productos con la nube en un hilo separado sin bloquear la UI.
-        """
+        """Sincroniza manualmente los productos con la nube sin bloquear la UI."""
         self.sync_worker = SyncWorker()
         self.sync_worker.finished.connect(self.handle_sync_finished)
         self.sync_worker.start()
 
     def handle_sync_finished(self, result):
-        """
-        Maneja el resultado del hilo de sincronización sin mostrar un diálogo.
-        """
+        """Maneja el resultado del hilo de sincronización."""
         if isinstance(result, Exception):
             print(f"Error en sincronización: {result}")
         else:
             print(result)
 
     def on_confirmar_venta(self):
-        """
-        Registra la venta usando hilos (QThread) para evitar congelar la UI.
-        """
+        """Registra la venta usando un hilo para evitar congelar la UI."""
         items = []
         row_count = self.table.rowCount()
 
@@ -130,7 +122,6 @@ class POSWindow(QWidget):
 
             barcode_str = barcode_item.text().strip()
             product_info = get_product_by_barcode(barcode_str)
-
             if not product_info or 'id' not in product_info:
                 continue
 
@@ -152,11 +143,8 @@ class POSWindow(QWidget):
         self.worker.start()
 
     def handle_finished(self, result):
-        """
-        Maneja la respuesta del hilo secundario.
-        """
+        """Maneja la respuesta del hilo secundario para el registro de la venta."""
         self.loading_dialog.close()
-
         if isinstance(result, Exception):
             QMessageBox.critical(self, "Error", str(result))
             return
@@ -169,20 +157,12 @@ class POSWindow(QWidget):
             QMessageBox.critical(self, "Error al registrar venta", f"Código {response.status_code}:\n{response.text}")
 
     def auto_sync(self):
-        """
-        Sincroniza la base de datos local con la nube.
-        """
+        """Sincroniza la base de datos local con la nube."""
         sync_all_products()
         print("Auto-sync completado.")
 
-    # ----------------------------------------------------------------
-    # Método para Cancelar la Venta
-    # ----------------------------------------------------------------
     def on_cancelar_venta(self):
-        """
-        Cancela la venta borrando todos los productos de la tabla.
-        Solicita confirmación antes de cancelar.
-        """
+        """Cancela la venta borrando los productos de la tabla, tras confirmación."""
         confirm = QMessageBox.question(
             self,
             "Cancelar Venta",
@@ -198,9 +178,7 @@ class POSWindow(QWidget):
     # Métodos de Apoyo
     # ----------------------------------------------------------------
     def add_product_to_table(self, product: dict):
-        """
-        Agrega un producto a la tabla.
-        """
+        """Agrega un producto a la tabla."""
         row_idx = self.table.rowCount()
         self.table.insertRow(row_idx)
 
@@ -225,33 +203,24 @@ class POSWindow(QWidget):
         self.recalcular_total()
 
     def on_delete_item(self, row_idx: int):
-        """
-        Elimina un producto de la tabla.
-        """
+        """Elimina un producto de la tabla."""
         self.table.removeRow(row_idx)
         self.recalcular_total()
 
     def recalcular_total(self):
-        """
-        Recalcula el total de la venta.
-        """
+        """Recalcula el total de la venta."""
         total = 0.0
         row_count = self.table.rowCount()
-
         for row in range(row_count):
             price_str = self.table.item(row, 2).text()
             price_val = float(price_str.replace("$", ""))
-
             spin = self.table.cellWidget(row, 3)
             quantity = spin.value() if spin else 1
             total += price_val * quantity
-
         self.label_total_amount.setText(f"Total: ${total:.2f}")
 
     def find_table_row_by_barcode(self, barcode: str) -> int | None:
-        """
-        Encuentra un producto en la tabla por código de barras.
-        """
+        """Encuentra un producto en la tabla por código de barras."""
         for row in range(self.table.rowCount()):
             item_barcode = self.table.item(row, 0)
             if item_barcode and item_barcode.text() == barcode:
@@ -265,10 +234,14 @@ class POSWindow(QWidget):
         self.recalcular_total()
 
     def _clear_table_and_total(self):
-        """
-        Borra el contenido de la tabla, resetea el total y limpia el campo de búsqueda.
-        """
+        """Borra el contenido de la tabla, resetea el total y limpia el campo de búsqueda."""
         self.table.clearContents()
         self.table.setRowCount(0)
         self.label_total_amount.setText("Total: $0.00")
         self.search_input.clear()
+
+    def on_cerrar_caja(self):
+        """Abre la ventana de cierre de caja para ingresar el monto de cierre."""
+        from .cierre_caja import CierreCajaWindow
+        self.cierre_caja_window = CierreCajaWindow()
+        self.cierre_caja_window.show()
