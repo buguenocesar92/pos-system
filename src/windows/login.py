@@ -1,5 +1,4 @@
 # windows/login.py
-
 import requests
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox
 
@@ -11,7 +10,7 @@ from constants import (
     HOST_FILE
 )
 from windows.pos import POSWindow
-from sync import sync_all_products
+from sync_worker import SyncWorker  # Importa el worker de sincronización
 
 class LoginWindow(QWidget):
     def __init__(self):
@@ -85,8 +84,25 @@ class LoginWindow(QWidget):
             QMessageBox.critical(self, "Error de conexión", str(e))
 
     def open_pos(self):
-        sync_all_products()
-        # 2) Mostrar la ventana
-        self.close()
+        """
+        Abre la ventana del POS y, en segundo plano, sincroniza los productos sin bloquear la UI.
+        """
+        # 1) Abrir la ventana del POS de inmediato
         self.pos_window = POSWindow()
         self.pos_window.show()
+        self.close()
+
+        # 2) Iniciar la sincronización en segundo plano usando un QThread
+        self.sync_worker = SyncWorker()
+        self.sync_worker.finished.connect(self.handle_sync_finished)
+        self.sync_worker.start()
+
+    def handle_sync_finished(self, result):
+        """
+        Maneja el resultado de la sincronización.
+        En este ejemplo se imprime el resultado en la consola; puedes adaptarlo según necesites.
+        """
+        if isinstance(result, Exception):
+            print("Error en sincronización:", result)
+        else:
+            print(result)
