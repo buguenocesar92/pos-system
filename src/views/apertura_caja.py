@@ -6,7 +6,7 @@ from PyQt6.QtCore import Qt
 from src.workers.open_cash_register_worker import OpenCashRegisterWorker
 
 # Si utilizas un diálogo de carga, asegúrate de importarlo.
-from src.loading_dialog import MaterialLoadingDialog  # O el nombre que utilices
+from src.components.loading_dialog import MaterialLoadingDialog  # O el nombre que utilices
 
 class AperturaCajaWindow(QWidget):
     def __init__(self):

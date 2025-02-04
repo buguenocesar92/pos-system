@@ -1,14 +1,48 @@
-# src/components/loading_dialog.py
+from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QMovie
+import os
 
-from PyQt6.QtWidgets import QDialog, QHBoxLayout, QLabel
-
-class LoadingDialog(QDialog):
-    """Diálogo modal con un mensaje de carga."""
-    def __init__(self, parent=None):
+class MaterialLoadingDialog(QDialog):
+    def __init__(self, parent=None, message="Cargando..."):
         super().__init__(parent)
-        self.setWindowTitle("Procesando...")
+        # Eliminar marco y fondo para un diseño moderno
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Dialog)
         self.setModal(True)
-        self.setFixedSize(250, 100)
-        layout = QHBoxLayout(self)
-        self.label = QLabel("Registrando venta, por favor espere...")
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+        # Configurar el layout
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(10)
+
+        # Etiqueta del mensaje
+        self.label = QLabel(message)
+        self.label.setStyleSheet("color: white; font-size: 16px; font-weight: bold;")
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Etiqueta del GIF de carga
+        self.loading_label = QLabel(self)
+        self.loading_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Ruta absoluta del GIF
+        import sys
+
+        if hasattr(sys, '_MEIPASS'):  # Si el programa está empaquetado
+            base_path = sys._MEIPASS
+        else:  # En desarrollo, usa la ruta normal
+            base_path = os.path.dirname(__file__)
+
+        gif_path = os.path.join(base_path, "../loading.gif")
+
+        if os.path.exists(gif_path):  # Verifica si el archivo existe
+            self.movie = QMovie(gif_path)
+            self.movie.setScaledSize(QSize(100, 100))  # 🔹 Ajusta el tamaño del GIF (px)
+            self.loading_label.setMovie(self.movie)
+            self.movie.start()  # Inicia la animación
+        else:
+            self.loading_label.setText("⚠️ GIF no encontrado")  # Mensaje si no se encuentra
+
+        layout.addWidget(self.loading_label)
         layout.addWidget(self.label)
+        self.setLayout(layout)

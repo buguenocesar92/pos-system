@@ -9,7 +9,7 @@ from src.workers.sync_worker import SyncWorker
 from src.workers.workers import WorkerThread
 from src.components.left_panel import LeftPanel
 from src.components.right_panel import RightPanel
-from src.components.loading_dialog import LoadingDialog
+from src.components.loading_dialog_v1 import LoadingDialog
 
 def load_stylesheet(file_path: str) -> str:
     """Carga y retorna el contenido del archivo de estilos."""

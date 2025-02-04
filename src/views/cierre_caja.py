@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton
 from PyQt6.QtGui import QFont, QGuiApplication
 from PyQt6.QtCore import Qt
 from src.workers.close_cash_register_worker import CloseCashRegisterWorker
-from src.loading_dialog import MaterialLoadingDialog
+from src.components.loading_dialog import MaterialLoadingDialog
 
 class CierreCajaWindow(QWidget):
     def __init__(self):
