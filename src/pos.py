@@ -2,16 +2,15 @@
 
 import os
 from PyQt6.QtWidgets import (
-    QWidget, QHBoxLayout, QDialog, QLabel, QMessageBox, QTableWidgetItem,
-    QSpinBox, QPushButton
+    QWidget, QHBoxLayout, QVBoxLayout, QDialog, QLabel, QMessageBox, 
+    QTableWidget, QSpinBox, QPushButton, QLineEdit, QComboBox, QAbstractItemView,
+    QHeaderView, QTableWidgetItem, QFrame
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 from src.local_db import init_db, get_product_by_barcode
-from src.pos_layout import build_left_container, build_right_container
-from src.pos_controller import connect_signals
 from src.sync import sync_all_products
-from src.workers.sync_worker import SyncWorker   # Asegúrate de importar la clase SyncWorker
-from src.workers.workers import WorkerThread  # Asegúrate de importar la clase WorkerThread
+from src.workers.sync_worker import SyncWorker
+from src.workers.workers import WorkerThread
 
 STYLE_SHEET = """
 /* Estilos generales */
@@ -90,18 +89,88 @@ class POSWindow(QWidget):
         self._init_main_layout()
 
         # 3) Conectar eventos (definidos en pos_controller.py)
-        connect_signals(self)
+        self._connect_signals()
 
     def _init_main_layout(self):
         main_layout = QHBoxLayout(self)
 
-        self.left_container = build_left_container(self)
-        self.right_container = build_right_container(self)
+        self.left_container = self._build_left_container()
+        self.right_container = self._build_right_container()
+
 
         main_layout.addWidget(self.left_container, stretch=3)
         main_layout.addWidget(self.right_container, stretch=1)
 
         self.setLayout(main_layout)
+    def _build_left_container(self) -> QFrame:
+        """Crea el contenedor izquierdo con búsqueda y tabla de productos."""
+        container = QFrame()
+        layout = QVBoxLayout(container)
+
+        # 🔹 Barra de búsqueda
+        search_layout = QHBoxLayout()
+        lbl_search = QLabel("Código del Producto:")
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Escanea o ingresa código...")
+        self.btnBuscar = QPushButton("Buscar")
+        self.btnSync = QPushButton("Sync")
+
+        search_layout.addWidget(lbl_search)
+        search_layout.addWidget(self.search_input)
+        search_layout.addWidget(self.btnBuscar)
+        search_layout.addWidget(self.btnSync)
+        layout.addLayout(search_layout)
+
+        # 🔹 Tabla de productos
+        self.table = QTableWidget()
+        self.table.setColumnCount(5)
+        self.table.setHorizontalHeaderLabels(["Código", "Descripción", "Precio", "Cantidad", "Acciones"])
+        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        layout.addWidget(self.table)
+
+        return container
+
+    def _build_right_container(self) -> QFrame:
+        """Crea el contenedor derecho con totales y botones."""
+        container = QFrame()
+        layout = QVBoxLayout(container)
+
+        # 🔹 Totales
+        lbl_totales = QLabel("Totales")
+        layout.addWidget(lbl_totales, alignment=Qt.AlignmentFlag.AlignLeft)
+        self.label_total_amount = QLabel("Total: $0.00")
+        layout.addWidget(self.label_total_amount, alignment=Qt.AlignmentFlag.AlignLeft)
+        layout.addSpacing(20)
+
+        # 🔹 Botones
+        self.btn_confirmar_venta = QPushButton("CONFIRMAR VENTA")
+        self.btn_cancelar_venta = QPushButton("CANCELAR VENTA")
+        self.btn_cerrar_caja = QPushButton("CERRAR CAJA")
+
+        layout.addWidget(self.btn_confirmar_venta)
+        layout.addWidget(self.btn_cancelar_venta)
+        layout.addWidget(self.btn_cerrar_caja)
+        layout.addStretch()
+
+        return container
+
+    def _connect_signals(self):
+        """Conecta los eventos de la UI con sus respectivos métodos."""
+        self.search_input.returnPressed.connect(self.on_search_barcode)
+        self.btnBuscar.clicked.connect(self.on_search_barcode)
+        self.btnSync.clicked.connect(self.on_sync_products)
+        self.btn_confirmar_venta.clicked.connect(self.on_confirmar_venta)
+        self.btn_cancelar_venta.clicked.connect(self.on_cancelar_venta)
+        self.btn_cerrar_caja.clicked.connect(self.on_cerrar_caja)
+
+        # Auto-sync cada X tiempo
+        self.timer = QTimer(self)
+        self.timer.setInterval(self.SYNC_INTERVAL_MS)
+        self.timer.timeout.connect(self.auto_sync)
+        self.timer.start()
+
     # ----------------------------------------------------------------
     # Métodos de Lógica / Eventos
     # ----------------------------------------------------------------
