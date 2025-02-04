@@ -26,7 +26,14 @@ class MaterialLoadingDialog(QDialog):
         self.loading_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Ruta absoluta del GIF
-        gif_path = os.path.join(os.path.dirname(__file__), "assets", "loading.gif")
+        import sys
+
+        if hasattr(sys, '_MEIPASS'):  # Si el programa está empaquetado
+            base_path = sys._MEIPASS
+        else:  # En desarrollo, usa la ruta normal
+            base_path = os.path.dirname(__file__)
+
+        gif_path = os.path.join(base_path, "loading.gif")
 
         if os.path.exists(gif_path):  # Verifica si el archivo existe
             self.movie = QMovie(gif_path)

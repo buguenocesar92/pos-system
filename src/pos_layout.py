@@ -5,6 +5,8 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
+# 🔹 Estilos QSS integrados en línea
+
 def build_left_container(parent) -> QFrame:
     """
     Crea el contenedor izquierdo con la barra de búsqueda, tabla y paginación.

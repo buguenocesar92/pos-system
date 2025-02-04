@@ -13,6 +13,53 @@ from src.sync import sync_all_products
 from src.sync_worker import SyncWorker   # Asegúrate de importar la clase SyncWorker
 from src.workers import WorkerThread     # Importamos el WorkerThread extraído
 
+STYLE_SHEET = """
+/* Estilos generales */
+QWidget {
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+/* Botones */
+QPushButton {
+    background-color: #007bff; /* Azul por defecto */
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+    padding: 10px;
+}
+QPushButton:hover {
+    background-color: #0056b3;
+}
+QPushButton#CancelBtn {
+    background-color: #dc3545;
+}
+QPushButton#CancelBtn:hover {
+    background-color: #c82333;
+}
+QPushButton#ConfirmBtn {
+    background-color: #28a745;
+}
+QPushButton#ConfirmBtn:hover {
+    background-color: #218838;
+}
+
+/* Tabla */
+QTableWidget {
+    border: 1px solid #ccc;
+    gridline-color: #ccc;
+}
+QTableWidget::item {
+    padding: 5px;
+}
+QHeaderView::section {
+    background-color: #f1f1f1;
+    font-weight: bold;
+    padding: 5px;
+    border: none;
+}
+"""
 # Diálogo de carga para registrar ventas
 class LoadingDialog(QDialog):
     """Diálogo modal con un mensaje de carga."""
@@ -37,11 +84,10 @@ class POSWindow(QWidget):
         self.setWindowTitle("Venta de Productos")
         self.showMaximized() 
 
+        self.setStyleSheet(STYLE_SHEET)
+
         # 1) Construir la interfaz
         self._init_main_layout()
-
-        # 2) Cargar estilos
-        self._load_stylesheet()
 
         # 3) Conectar eventos (definidos en pos_controller.py)
         connect_signals(self)
@@ -56,21 +102,6 @@ class POSWindow(QWidget):
         main_layout.addWidget(self.right_container, stretch=1)
 
         self.setLayout(main_layout)
-
-    def _load_stylesheet(self):
-        style_path = os.path.join(
-            os.path.dirname(__file__),
-            "..",
-            "styles",
-            "pos_style.qss"
-        )
-        try:
-            with open(style_path, "r", encoding="utf-8") as f:
-                style_sheet = f.read()
-            self.setStyleSheet(style_sheet)
-        except FileNotFoundError:
-            print(f"[WARNING] No se encontró el archivo de estilos: {style_path}")
-
     # ----------------------------------------------------------------
     # Métodos de Lógica / Eventos
     # ----------------------------------------------------------------
