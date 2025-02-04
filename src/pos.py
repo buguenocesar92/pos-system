@@ -183,6 +183,10 @@ class POSWindow(QWidget):
         # 3) Conectar eventos (definidos en pos_controller.py)
         self._connect_signals()
 
+        QTimer.singleShot(200, self.set_search_focus) 
+    def set_search_focus(self):
+        """Asegura que el campo de búsqueda tenga el foco."""
+        self.search_input.setFocus()
     def _init_main_layout(self):
         main_layout = QHBoxLayout(self)
 
