@@ -135,6 +135,20 @@ QPushButton#CloseBtn:hover {
 QPushButton#CloseBtn:pressed {
     background-color: #0d6e7b;
 }
+/* Botón Eliminar */
+QPushButton#DeleteBtn {
+    background-color: #dc3545; /* Rojo */
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+    padding: 5px;
+}
+QPushButton#DeleteBtn:hover {
+    background-color: #c82333;
+}
+QPushButton#DeleteBtn:pressed {
+    background-color: #a71d2a;
+}
 """
 
 # Diálogo de carga para registrar ventas
@@ -401,7 +415,8 @@ class POSWindow(QWidget):
         spin_cantidad.valueChanged.connect(self.recalcular_total)
         self.table.setCellWidget(row_idx, 3, spin_cantidad)
 
-        btn_delete = QPushButton("🗑")
+        btn_delete = QPushButton("Eliminar")
+        btn_delete.setObjectName("DeleteBtn")  # ID para estilos
         btn_delete.clicked.connect(lambda checked, r=row_idx: self.on_delete_item(r))
         self.table.setCellWidget(row_idx, 4, btn_delete)
 
