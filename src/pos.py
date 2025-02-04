@@ -20,6 +20,20 @@ QWidget {
     font-size: 14px;
 }
 
+/* Input de búsqueda */
+QLineEdit {
+    border: 1px solid #d9d9d9;
+    border-radius: 5px;
+    background: #F5F5F5;
+    padding: 8px;
+    font-size: 14px;
+    color: #333333;
+}
+QLineEdit:focus {
+    border: 1px solid #4A90E2;
+    background: #FFFFFF;
+}
+
 /* Botones */
 QPushButton {
     background-color: #007bff; /* Azul por defecto */
@@ -30,6 +44,9 @@ QPushButton {
 }
 QPushButton:hover {
     background-color: #0056b3;
+}
+QPushButton:pressed {
+    background-color: #003f7f;
 }
 QPushButton#CancelBtn {
     background-color: #dc3545;
@@ -42,6 +59,18 @@ QPushButton#ConfirmBtn {
 }
 QPushButton#ConfirmBtn:hover {
     background-color: #218838;
+}
+QPushButton#SyncBtn {
+    background-color: #17a2b8; /* Azul claro */
+}
+QPushButton#SyncBtn:hover {
+    background-color: #138496;
+}
+QPushButton#BuscarBtn {
+    background-color: #ffc107; /* Amarillo */
+}
+QPushButton#BuscarBtn:hover {
+    background-color: #e0a800;
 }
 
 /* Tabla */
@@ -58,7 +87,56 @@ QHeaderView::section {
     padding: 5px;
     border: none;
 }
+
+/* Botones de paginación */
+QPushButton#PrevPageBtn, QPushButton#NextPageBtn {
+    background-color: #6c757d; /* Gris */
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+    padding: 5px;
+}
+QPushButton#PrevPageBtn:hover, QPushButton#NextPageBtn:hover {
+    background-color: #5a6268;
+}
+
+/* Botón Confirmar Venta */
+QPushButton#ConfirmBtn {
+    background-color: #28a745; /* Verde */
+    color: white;
+}
+QPushButton#ConfirmBtn:hover {
+    background-color: #218838;
+}
+QPushButton#ConfirmBtn:pressed {
+    background-color: #19692c;
+}
+
+/* Botón Cancelar Venta */
+QPushButton#CancelBtn {
+    background-color: #dc3545; /* Rojo */
+    color: white;
+}
+QPushButton#CancelBtn:hover {
+    background-color: #c82333;
+}
+QPushButton#CancelBtn:pressed {
+    background-color: #a71d2a;
+}
+
+/* Botón Cerrar Caja */
+QPushButton#CloseBtn {
+    background-color: #17a2b8; /* Azul claro */
+    color: white;
+}
+QPushButton#CloseBtn:hover {
+    background-color: #138496;
+}
+QPushButton#CloseBtn:pressed {
+    background-color: #0d6e7b;
+}
 """
+
 # Diálogo de carga para registrar ventas
 class LoadingDialog(QDialog):
     """Diálogo modal con un mensaje de carga."""
@@ -103,7 +181,7 @@ class POSWindow(QWidget):
 
         self.setLayout(main_layout)
     def _build_left_container(self) -> QFrame:
-        """Crea el contenedor izquierdo con búsqueda y tabla de productos."""
+        """Crea el contenedor izquierdo con búsqueda, tabla y paginación."""
         container = QFrame()
         layout = QVBoxLayout(container)
 
@@ -113,7 +191,9 @@ class POSWindow(QWidget):
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Escanea o ingresa código...")
         self.btnBuscar = QPushButton("Buscar")
+        self.btnBuscar.setObjectName("BuscarBtn")  # ID para CSS
         self.btnSync = QPushButton("Sync")
+        self.btnSync.setObjectName("SyncBtn")  # ID para CSS
 
         search_layout.addWidget(lbl_search)
         search_layout.addWidget(self.search_input)
@@ -130,7 +210,27 @@ class POSWindow(QWidget):
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         layout.addWidget(self.table)
 
+        # 🔹 Paginación
+        pagination_layout = QHBoxLayout()
+        lbl_pagination = QLabel("Items per page:")
+        self.combo_items_per_page = QComboBox()
+        self.combo_items_per_page.addItems(["5", "10", "20", "50"])
+        self.label_pagination_info = QLabel("1-1 of 1")
+        self.btn_prev_page = QPushButton("◀")
+        self.btn_prev_page.setObjectName("PrevPageBtn")  # ID para CSS
+        self.btn_next_page = QPushButton("▶")
+        self.btn_next_page.setObjectName("NextPageBtn")  # ID para CSS
+
+        pagination_layout.addWidget(lbl_pagination)
+        pagination_layout.addWidget(self.combo_items_per_page)
+        pagination_layout.addWidget(self.label_pagination_info)
+        pagination_layout.addWidget(self.btn_prev_page)
+        pagination_layout.addWidget(self.btn_next_page)
+        layout.addLayout(pagination_layout)
+
         return container
+
+
 
     def _build_right_container(self) -> QFrame:
         """Crea el contenedor derecho con totales y botones."""
@@ -146,8 +246,13 @@ class POSWindow(QWidget):
 
         # 🔹 Botones
         self.btn_confirmar_venta = QPushButton("CONFIRMAR VENTA")
+        self.btn_confirmar_venta.setObjectName("ConfirmBtn")  # ID para estilos
+
         self.btn_cancelar_venta = QPushButton("CANCELAR VENTA")
+        self.btn_cancelar_venta.setObjectName("CancelBtn")  # ID para estilos
+
         self.btn_cerrar_caja = QPushButton("CERRAR CAJA")
+        self.btn_cerrar_caja.setObjectName("CloseBtn")  # ID para estilos
 
         layout.addWidget(self.btn_confirmar_venta)
         layout.addWidget(self.btn_cancelar_venta)
