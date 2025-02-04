@@ -1,5 +1,3 @@
-# src/pos_window.py
-
 import os
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QTableWidgetItem
 from PyQt6.QtCore import QTimer
@@ -10,11 +8,6 @@ from src.workers.workers import WorkerThread
 from src.components.left_panel import LeftPanel
 from src.components.right_panel import RightPanel
 from src.components.loading_dialog import MaterialLoadingDialog  # O el nombre que utilices
-
-def load_stylesheet(file_path: str) -> str:
-    """Carga y retorna el contenido del archivo de estilos."""
-    with open(file_path, "r", encoding="utf-8") as f:
-        return f.read()
 
 class POSWindow(QWidget):
     """Ventana principal del POS que integra el panel izquierdo y derecho."""
@@ -27,9 +20,144 @@ class POSWindow(QWidget):
         self.setWindowTitle("Venta de Productos")
         self.showMaximized()
 
-        # Cargar estilos desde un archivo externo (ajusta la ruta según tu estructura)
-        stylesheet_path = os.path.join(os.path.dirname(__file__), "style.qss")
-        self.setStyleSheet(load_stylesheet(stylesheet_path))
+        # Estilos en línea
+        self.setStyleSheet("""
+        QWidget {
+            background-color: #f9f9f9;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        /* Input de búsqueda */
+        QLineEdit {
+            border: 1px solid #d9d9d9;
+            border-radius: 5px;
+            background: #F5F5F5;
+            padding: 8px;
+            font-size: 14px;
+            color: #333333;
+        }
+        QLineEdit:focus {
+            border: 1px solid #4A90E2;
+            background: #FFFFFF;
+        }
+
+        /* Botones */
+        QPushButton {
+            background-color: #007bff; /* Azul por defecto */
+            color: white;
+            font-weight: bold;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        QPushButton:hover {
+            background-color: #0056b3;
+        }
+        QPushButton:pressed {
+            background-color: #003f7f;
+        }
+        QPushButton#CancelBtn {
+            background-color: #dc3545;
+        }
+        QPushButton#CancelBtn:hover {
+            background-color: #c82333;
+        }
+        QPushButton#ConfirmBtn {
+            background-color: #28a745;
+        }
+        QPushButton#ConfirmBtn:hover {
+            background-color: #218838;
+        }
+        QPushButton#SyncBtn {
+            background-color: #17a2b8; /* Azul claro */
+        }
+        QPushButton#SyncBtn:hover {
+            background-color: #138496;
+        }
+        QPushButton#BuscarBtn {
+            background-color: #ffc107; /* Amarillo */
+        }
+        QPushButton#BuscarBtn:hover {
+            background-color: #e0a800;
+        }
+
+        /* Tabla */
+        QTableWidget {
+            border: 1px solid #ccc;
+            gridline-color: #ccc;
+        }
+        QTableWidget::item {
+            padding: 5px;
+        }
+        QHeaderView::section {
+            background-color: #f1f1f1;
+            font-weight: bold;
+            padding: 5px;
+            border: none;
+        }
+
+        /* Botones de paginación */
+        QPushButton#PrevPageBtn, QPushButton#NextPageBtn {
+            background-color: #6c757d; /* Gris */
+            color: white;
+            font-weight: bold;
+            border-radius: 5px;
+            padding: 5px;
+        }
+        QPushButton#PrevPageBtn:hover, QPushButton#NextPageBtn:hover {
+            background-color: #5a6268;
+        }
+
+        /* Botón Confirmar Venta */
+        QPushButton#ConfirmBtn {
+            background-color: #28a745; /* Verde */
+            color: white;
+        }
+        QPushButton#ConfirmBtn:hover {
+            background-color: #218838;
+        }
+        QPushButton#ConfirmBtn:pressed {
+            background-color: #19692c;
+        }
+
+        /* Botón Cancelar Venta */
+        QPushButton#CancelBtn {
+            background-color: #dc3545; /* Rojo */
+            color: white;
+        }
+        QPushButton#CancelBtn:hover {
+            background-color: #c82333;
+        }
+        QPushButton#CancelBtn:pressed {
+            background-color: #a71d2a;
+        }
+
+        /* Botón Cerrar Caja */
+        QPushButton#CloseBtn {
+            background-color: #17a2b8; /* Azul claro */
+            color: white;
+        }
+        QPushButton#CloseBtn:hover {
+            background-color: #138496;
+        }
+        QPushButton#CloseBtn:pressed {
+            background-color: #0d6e7b;
+        }
+        /* Botón Eliminar */
+        QPushButton#DeleteBtn {
+            background-color: #dc3545; /* Rojo */
+            color: white;
+            font-weight: bold;
+            border-radius: 5px;
+            padding: 5px;
+        }
+        QPushButton#DeleteBtn:hover {
+            background-color: #c82333;
+        }
+        QPushButton#DeleteBtn:pressed {
+            background-color: #a71d2a;
+        }
+        """)
 
         self._init_ui()
         self._connect_signals()
