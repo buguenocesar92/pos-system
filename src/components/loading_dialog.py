@@ -1,64 +1,48 @@
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QApplication
-from PyQt6.QtCore import Qt, QTimer, QRectF
-from PyQt6.QtGui import QPainter, QPen, QColor
+from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QMovie
+import os
 import sys
-
 
 class MaterialLoadingDialog(QDialog):
     def __init__(self, parent=None, message="Cargando..."):
         super().__init__(parent)
-
-        # Configurar la ventana sin bordes y con fondo oscuro
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Dialog)
         self.setModal(True)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
-        # Estilo general
-        self.setStyleSheet("""
-        QDialog {
-            background-color: rgba(0, 0, 0, 180);  /* Fondo semi-transparente */
-            border-radius: 10px;
-        }
-        QLabel {
-            color: white;  /* Texto blanco */
-            font-size: 16px;  /* Tamaño del texto */
-            font-weight: bold;  /* Texto en negrita */
-        }
-        """)
-
-        # Configurar el layout
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(10)
 
         # Etiqueta del mensaje
-        self.label = QLabel(message, self)
+        self.label = QLabel(message)
+        self.label.setStyleSheet("color: white; font-size: 16px; font-weight: bold;")
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        # Añadir la etiqueta al layout
+        # Etiqueta del GIF de carga
+        self.loading_label = QLabel(self)
+        self.loading_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Ruta al GIF
+        gif_path = self.get_gif_path()
+        print(f"Ruta al GIF: {gif_path}")  # Para depuración
+        if os.path.exists(gif_path):
+            self.movie = QMovie(gif_path)
+            self.movie.setScaledSize(QSize(100, 100))  # Ajusta el tamaño
+            self.loading_label.setMovie(self.movie)
+            self.movie.start()
+        else:
+            self.loading_label.setText("⚠️ GIF no encontrado")
+
+        layout.addWidget(self.loading_label)
         layout.addWidget(self.label)
         self.setLayout(layout)
 
-        # Configurar el tamaño del diálogo
-        self.setFixedSize(200, 200)
-
-        # Configurar el spinner
-        self.angle = 0
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_spinner)
-        self.timer.start(50)  # Actualizar cada 50ms
-
-    def update_spinner(self):
-        """Actualiza el ángulo del spinner."""
-        self.angle = (self.angle + 10) % 360  # Incrementar el ángulo
-        self.update()
-
-    def paintEvent(self, event):
-        """Dibuja el spinner en el centro del diálogo."""
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-
-        # Configurar el área de dibujo
-        size = self.width()
-        rect = QRectF(size / 4, size / 4, size / 2, size / 2)  # Spinner centrado
-        
+    def get_gif_path(self):
+        """Devuelve la ruta al archivo GIF, manejando entornos de desarrollo y empaquetado."""
+        import sys
+        if hasattr(sys, "_MEIPASS"):  # Entorno empaquetado
+            return os.path.join(sys._MEIPASS, "loading.gif")
+        else:  # Entorno de desarrollo
+            return os.path.abspath(os.path.join(os.path.dirname(__file__), "loading.gif"))
