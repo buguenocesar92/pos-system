@@ -3,7 +3,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox, QApplication
 from PyQt6.QtGui import QFont, QGuiApplication
 from PyQt6.QtCore import Qt
-from src.close_cash_register_worker import CloseCashRegisterWorker
+from src.workers.close_cash_register_worker import CloseCashRegisterWorker
 from src.loading_dialog import MaterialLoadingDialog
 
 class CierreCajaWindow(QWidget):

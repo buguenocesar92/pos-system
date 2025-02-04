@@ -10,8 +10,8 @@ from src.local_db import init_db, get_product_by_barcode
 from src.pos_layout import build_left_container, build_right_container
 from src.pos_controller import connect_signals
 from src.sync import sync_all_products
-from src.sync_worker import SyncWorker   # Asegúrate de importar la clase SyncWorker
-from src.workers import WorkerThread     # Importamos el WorkerThread extraído
+from src.workers.sync_worker import SyncWorker   # Asegúrate de importar la clase SyncWorker
+from src.workers.workers import WorkerThread  # Asegúrate de importar la clase WorkerThread
 
 STYLE_SHEET = """
 /* Estilos generales */

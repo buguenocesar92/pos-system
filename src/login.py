@@ -7,9 +7,9 @@ from qt_material import apply_stylesheet
 
 from src.constants import API_BASE_URL, ACCESS_TOKEN_FILE, REFRESH_TOKEN_FILE, HOST_FILE
 from src.pos import POSWindow
-from src.sync_worker import SyncWorker
+from src.workers.sync_worker import SyncWorker
 from src.loading_dialog import MaterialLoadingDialog
-from src.login_worker import LoginWorker
+from src.workers.login_worker import LoginWorker
 
 class LoginWindow(QWidget):
     def __init__(self):
@@ -143,7 +143,7 @@ class LoginWindow(QWidget):
             return
 
         # Luego de la sincronización, se consulta el estado de la caja
-        from src.check_cash_register_status_worker import CheckCashRegisterStatusWorker
+        from src.workers.check_cash_register_status_worker import CheckCashRegisterStatusWorker
         self.status_worker = CheckCashRegisterStatusWorker()
         self.status_worker.finished.connect(self.handle_status_finished)
         self.status_worker.start()

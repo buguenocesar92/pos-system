@@ -3,7 +3,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox
 from PyQt6.QtGui import QFont, QGuiApplication
 from PyQt6.QtCore import Qt
-from src.open_cash_register_worker import OpenCashRegisterWorker
+from src.workers.open_cash_register_worker import OpenCashRegisterWorker
 
 # Si utilizas un diálogo de carga, asegúrate de importarlo.
 from src.loading_dialog import MaterialLoadingDialog  # O el nombre que utilices
