@@ -4,7 +4,7 @@ from PyQt6.QtCore import Qt
 
 from src.utils import write_file
 from src.constants import HOST_FILE
-from src.login import LoginWindow
+from src.views.login import LoginWindow
 
 
 class HostConfigWindow(QWidget):

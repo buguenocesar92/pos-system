@@ -11,7 +11,7 @@ sys.path.insert(0, base_path)  # Asegurar que `src` esté en sys.path
 
 # Importaciones con rutas absolutas
 from src.constants import HOST_FILE
-from src.login import LoginWindow
+from src.views.login import LoginWindow
 
 from PyQt6.QtWidgets import QApplication
 
@@ -23,7 +23,7 @@ def main():
         login_window = LoginWindow()
         login_window.show()
     else:
-        from src.host_config import HostConfigWindow
+        from src.views.host_config import HostConfigWindow
         host_window = HostConfigWindow()
         host_window.show()
 

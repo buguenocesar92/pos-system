@@ -107,7 +107,7 @@ class AperturaCajaWindow(QWidget):
             QMessageBox.information(self, "Éxito", message)
 
             # Luego de abrir la caja, se abre la ventana del POS.
-            from src.pos import POSWindow
+            from src.views.pos import POSWindow
             self.pos_window = POSWindow()
             self.pos_window.show()
             self.close()

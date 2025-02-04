@@ -6,7 +6,7 @@ from PyQt6.QtCore import Qt
 from qt_material import apply_stylesheet
 
 from src.constants import API_BASE_URL, ACCESS_TOKEN_FILE, REFRESH_TOKEN_FILE, HOST_FILE
-from src.pos import POSWindow
+from src.views.pos import POSWindow
 from src.workers.sync_worker import SyncWorker
 from src.loading_dialog import MaterialLoadingDialog
 from src.workers.login_worker import LoginWorker
@@ -160,7 +160,7 @@ class LoginWindow(QWidget):
             self.pos_window.show()
         else:
             # Si la caja está cerrada, se muestra la ventana de apertura de caja.
-            from src.apertura_caja import AperturaCajaWindow
+            from src.views.apertura_caja import AperturaCajaWindow
             self.apertura_caja_window = AperturaCajaWindow()
             self.apertura_caja_window.show()
 
